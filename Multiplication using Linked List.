@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+struct Node {
+    int coeff, pow;
+    struct Node* next;
+};
+struct Node* createNode(int coeff, int pow) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->coeff = coeff;
+    newNode->pow = pow;
+    newNode->next = NULL;
+    return newNode;
+}
+void insertNode(struct Node** poly, int coeff, int pow) {
+    struct Node* temp = *poly, *prev = NULL;
+    while (temp && temp->pow > pow) {
+        prev = temp;
+        temp = temp->next;
+    }
+    if (temp && temp->pow == pow) {
+        temp->coeff += coeff; 
+    } else {
+        struct Node* newNode = createNode(coeff, pow);
+        if (prev == NULL) { 
+            newNode->next = *poly;
+            *poly = newNode;
+        } else {
+            newNode->next = temp;
+            prev->next = newNode;
+        }
+    }
+}
+struct Node* multiplyPoly(struct Node* p1, struct Node* p2) {
+    struct Node* result = NULL;
+    for (struct Node* a = p1; a != NULL; a = a->next) {
+        for (struct Node* b = p2; b != NULL; b = b->next) {
+            int coeff = a->coeff * b->coeff;
+            int pow = a->pow + b->pow;
+            insertNode(&result, coeff, pow);
+        }
+    }
+    return result;
+}
+void insertEnd(struct Node** poly, int coeff, int pow) {
+    struct Node* newNode = createNode(coeff, pow);
+    if (*poly == NULL)
+        *poly = newNode;
+    else {
+        struct Node* temp = *poly;
+        while (temp->next) temp = temp->next;
+        temp->next = newNode;
+    }
+}
+void display(struct Node* poly) {
+    while (poly) {
+        printf("%dx^%d", poly->coeff, poly->pow);
+        poly = poly->next;
+        if (poly) printf(" + ");
+    }
+    printf("\n");
+}
+int main() {
+    struct Node *poly1 = NULL, *poly2 = NULL, *product = NULL;
+    insertEnd(&poly1, 2, 1);
+    insertEnd(&poly1, 1, 0);
+    insertEnd(&poly2, 3, 2);
+    insertEnd(&poly2, 2, 1);
+    insertEnd(&poly2, 1, 0);
+    printf("Polynomial 1: "); display(poly1);
+    printf("Polynomial 2: "); display(poly2);
+    product = multiplyPoly(poly1, poly2);
+    printf("Product: "); display(product);
+    return 0;
+}
